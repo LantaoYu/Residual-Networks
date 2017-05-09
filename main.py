@@ -20,10 +20,14 @@ def test(sess, resnet, dataloader):
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(sys.argv[0])
-    argparser.add_argument('--num_units', type=str, default='3,3,3')
-    argparser.add_argument('--filter_size', type=str, default='16,32,64')
-    argparser.add_argument('--stride', type=str, default='1,1,1')
-    argparser.add_argument('--class_num', type=int, default=10)
+    argparser.add_argument('--num_units', type=str, default='3,3,3',
+                           help='a list, number of residual units for each stage')
+    argparser.add_argument('--filter_size', type=str, default='16,32,64',
+                           help='a list, number of filters for each stage')
+    argparser.add_argument('--stride', type=str, default='1,1,1',
+                           help='a list, stride for each stage')
+    argparser.add_argument('--class_num', type=int, default=10,
+                           help='the number of output class')
     argparser.add_argument('--learning_rate', type=float, default=0.001)
     argparser.add_argument('--data_dir', type=str, default='cifar-10-batches-py')
     argparser.add_argument('--batch_size', type=int, default=32)

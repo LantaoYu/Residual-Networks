@@ -3,14 +3,6 @@ import tensorflow as tf
 
 class ResNet(object):
     def __init__(self, params):
-        """
-        :param params:
-         params.num_units: a list, number of residual units for each stage
-         params.filter_size: a list, number of filters for each stage
-         params.stride: a list, stride for each stage
-         params.class_num: the number of output class
-         params.learning_rate: learning rate
-        """
         self.params = params
 
         self.images = tf.placeholder(tf.float32, [None, 32, 32, 3])
