@@ -46,5 +46,5 @@ if __name__ == '__main__':
         for batch in xrange(dataloader.num_batches):
             batch_x, batch_y = dataloader.next_batch()
             sess.run(resnet.train_op, {resnet.images: batch_x, resnet.labels: batch_y})
-            if e % params.evaluate_every_epoch == 0:
-                test(sess, resnet, dataloader)
+        if e % params.evaluate_every_epoch == 0:
+            test(sess, resnet, dataloader)
