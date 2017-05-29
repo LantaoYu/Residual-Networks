@@ -10,6 +10,7 @@ class CIFAR_loader(object):
         train_files = [name for name in os.listdir(self.params.data_dir) if 'data_batch' in name]
         test_files = [name for name in os.listdir(self.params.data_dir) if 'test_batch' in name]
 
+        # Read files
         self.trainX = []
         self.trainY = []
         for file in train_files:
@@ -33,26 +34,36 @@ class CIFAR_loader(object):
         self.trainX = self.trainX[new_index]
         self.trainY = self.trainY[new_index]
 
-        self.data_size = len(self.trainY)
-        if self.data_size % self.params.batch_size == 0:
-            self.num_batches = self.data_size / self.params.batch_size
-        else:
-            self.num_batches = self.data_size / self.params.batch_size + 1
-
         # Change label to one_hot
         self.trainY = np.array([self.one_hot(i, self.params.class_num) for i in self.trainY])
-        self.counter = 0
+
+        # For split batch
+        self.train_counter = 0
+        self.test_counter = 0
+        self.train_data_size = len(self.trainY)
+        self.train_num_batches = int(np.ceil(1.0 * self.train_data_size / self.params.batch_size))
+        self.test_data_size = len(self.testY)
+        self.test_num_batches = int(np.ceil(1.0 * self.test_data_size / self.params.batch_size))
 
     def one_hot(self, x, out_dims):
         ret = np.zeros(out_dims)
         ret[x] = 1
         return ret
 
-    def next_batch(self):
-        next_batch_X = self.trainX[self.counter:self.counter + self.params.batch_size]
-        next_batch_Y = self.trainY[self.counter:self.counter + self.params.batch_size]
-        self.counter = (self.counter + self.params.batch_size) % self.data_size
+    def train_next_batch(self):
+        next_batch_X = self.trainX[self.train_counter:self.train_counter + self.params.batch_size]
+        next_batch_Y = self.trainY[self.train_counter:self.train_counter + self.params.batch_size]
+        self.train_counter = (self.train_counter + self.params.batch_size) % self.train_data_size
         return next_batch_X, next_batch_Y
 
-    def reset_counter(self):
-        self.counter = 0
+    def test_next_batch(self):
+        next_batch_X = self.testX[self.test_counter:self.test_counter + self.params.batch_size]
+        next_batch_Y = self.testY[self.test_counter:self.test_counter + self.params.batch_size]
+        self.test_counter = (self.test_counter + self.params.batch_size) % self.test_data_size
+        return next_batch_X, next_batch_Y
+
+    def reset_counter(self, mode):
+        if mode == 'train':
+            self.train_counter = 0
+        elif mode == 'test':
+            self.test_counter = 0

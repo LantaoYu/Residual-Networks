@@ -9,13 +9,16 @@ import numpy as np
 
 
 def test(sess, resnet, dataloader):
-    pred_Y = sess.run(resnet.output, {resnet.images: dataloader.testX})
-    pred_Y = np.argmax(pred_Y, 1)
     correct_num = 0
-    for i, j in zip(pred_Y, dataloader.testY):
-        if i == j:
-            correct_num += 1
-    print 1.0 * correct_num / len(dataloader.testY)
+    dataloader.reset_counter(mode='test')
+    for batch in xrange(dataloader.test_num_batches):
+        batch_x, batch_y = dataloader.test_next_batch()
+        pred_Y = sess.run(resnet.output, {resnet.images: batch_x})
+        pred_Y = np.argmax(pred_Y, 1)
+        for i, j in zip(pred_Y, batch_y):
+            if i == j:
+                correct_num += 1
+    print 1.0 * correct_num / dataloader.test_data_size
 
 
 if __name__ == '__main__':
@@ -42,13 +45,16 @@ if __name__ == '__main__':
     dataloader = CIFAR_loader(params)
     resnet = ResNet(params)
 
-    sess = tf.Session()
+    config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
+
     sess.run(tf.global_variables_initializer())
 
     for e in xrange(params.epoch_num):
-        dataloader.reset_counter()
-        for batch in xrange(dataloader.num_batches):
-            batch_x, batch_y = dataloader.next_batch()
+        dataloader.reset_counter(mode='train')
+        for batch in xrange(dataloader.train_num_batches):
+            batch_x, batch_y = dataloader.train_next_batch()
             sess.run(resnet.train_op, {resnet.images: batch_x, resnet.labels: batch_y})
         if e % params.evaluate_every_epoch == 0:
             test(sess, resnet, dataloader)
